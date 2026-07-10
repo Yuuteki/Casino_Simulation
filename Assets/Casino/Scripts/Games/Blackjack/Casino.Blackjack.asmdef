@@ -1,0 +1,16 @@
+{
+  "name": "Casino.Blackjack",
+  "rootNamespace": "Casino.Blackjack",
+  "references": [
+    "Casino.Core"
+  ],
+  "includePlatforms": [],
+  "excludePlatforms": [],
+  "allowUnsafeCode": false,
+  "overrideReferences": false,
+  "precompiledReferences": [],
+  "autoReferenced": true,
+  "defineConstraints": [],
+  "versionDefines": [],
+  "noEngineReferences": true
+}
