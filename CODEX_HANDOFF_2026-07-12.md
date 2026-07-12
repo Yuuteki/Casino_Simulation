@@ -140,6 +140,7 @@ When the user eventually asks to resume implementation:
 - Official chip balances have no product-level hard cap. Implementations still need safe integer bounds and overflow checks.
 - Betting upper limits are table/variant configuration, not a global maximum. Normal tables may define maximum bets, while any no-limit or all-in table must be explicitly selected and labeled.
 - Borrowing/relief is provided by the casino/system as personal player credit or relief, not by other players. Exact credit amounts, repayment behavior, and cooldowns are **pending**.
+- Borrowing status or outstanding debt must not by itself restrict which games, tables, or cosmetic/non-gameplay purchases a player can access. It may affect only credit-system terms such as borrowing limit, repayment, credit score, warning UI, and ledger display.
 - Direct player-to-player gifting, lending, trading, and manual transfers are forbidden.
 - Player-versus-player tables such as poker may legitimately move official chips between players through bets, pots, and authoritative table settlement.
 - Every chip change, including casino/system credit or relief, must reference a concrete source and a unique identifier; there is no generic transfer API.
