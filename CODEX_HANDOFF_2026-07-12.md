@@ -136,10 +136,23 @@ When the user eventually asks to resume implementation:
 - Practice/tutorial mode uses separate, non-persistent practice chips and must be selected explicitly.
 - Practice results do not affect official balance, official records, economic statistics, achievements, or progression rewards.
 - If official chips reach zero, the player may still practice and spectate.
-- Provide a daily chip supply and a limited relief mechanism; exact amounts and timing are **pending**.
+- Provide a daily chip supply and a limited relief mechanism; exact chip amounts and broad economic tuning are **pending**.
 - Official chip balances have no product-level hard cap. Implementations still need safe integer bounds and overflow checks.
 - Betting upper limits are table/variant configuration, not a global maximum. Normal tables may define maximum bets, while any no-limit or all-in table must be explicitly selected and labeled.
-- Borrowing/relief is provided by the casino/system as personal player credit or relief, not by other players. Exact credit amounts, repayment behavior, and cooldowns are **pending**.
+- Borrowing/relief is provided by the casino/system as personal player credit or relief, not by other players.
+- Casino/system credit v0.1 is settled:
+  - Credit score ranges from 0 to 100. New players start at 60.
+  - The first daily check-in grants +1 credit score, capped at 100.
+  - Let `D` be the daily base chip supply amount. The exact chip value of `D` remains **pending**.
+  - Maximum borrowing is 0 for credit 0-19, 3D for 20-39, 6D for 40-59, 10D for 60-79, and 15D for 80-100.
+  - Players may borrow any positive integer chip amount within remaining credit. Remaining credit is max borrowing minus current total debt, floored at 0.
+  - All borrowing enters one total debt pool. Total debt includes principal plus compounded interest; splitting borrowing into multiple requests must not reduce interest or create separate due dates.
+  - A 7-real-day credit cycle opens when debt goes from 0 to above 0. Additional borrowing during that cycle does not refresh the due date. Full repayment closes the cycle.
+  - Interest compounds once per day on current total debt. Daily rates are 1% for 0-25% of max borrowing, 3% for >25-50%, 6% for >50-75%, and 10% for >75% or above the limit. If max borrowing is 0 while debt remains, use the 10% rate.
+  - New total debt is rounded up to integer chip units after interest.
+  - Players may manually repay any amount at any time. While debt exists, 50% of positive official-chip income automatically repays debt before the remaining 50% enters spendable balance. The initial credit issue itself does not trigger auto-repayment.
+  - If debt remains at the due date, apply a single -20 credit-score penalty for that credit cycle. Overdue debt continues compounding at the 10% daily rate and blocks new borrowing only.
+  - Once per calendar month, outside active rounds/settlement, the player may use casino forgiveness to clear all current debt. After using it, no new borrowing is allowed for the rest of that month, and credit score becomes `min(max(currentCredit - 30, 20), 40)`.
 - Borrowing status or outstanding debt must not by itself restrict which games, tables, or cosmetic/non-gameplay purchases a player can access. It may affect only credit-system terms such as borrowing limit, repayment, credit score, warning UI, and ledger display.
 - Direct player-to-player gifting, lending, trading, and manual transfers are forbidden.
 - Player-versus-player tables such as poker may legitimately move official chips between players through bets, pots, and authoritative table settlement.
@@ -192,7 +205,7 @@ Discuss this with the user before treating it as settled.
 ## 16. Explicitly pending design decisions
 
 - Fixed named AI cast versus random visitor AI
-- Exact starting chip balance, daily supply, relief amount, cooldown, and economic tuning
+- Exact starting chip balance, daily base chip supply `D`, direct relief amount, and broad economic tuning
 - Detailed progression/reputation design
 - Final game title and names of the casino/rooms
 - Exact internet transport/relay service
