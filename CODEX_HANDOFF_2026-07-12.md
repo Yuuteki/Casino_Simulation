@@ -121,6 +121,7 @@ When the user eventually asks to resume implementation:
 - Reconnecting restores party membership and the latest confirmed state; it cannot undo actions confirmed during absence.
 - Normal tables are open-ended. There is no required number of rounds, mandatory match score, or automatic return to a lobby.
 - The party continues until members leave or the Host requests a different table.
+- Switching games or variants does not always require a physical table change. If the target uses the same table layout, seats, betting surface, equipment, and room, the party switches rules/configuration in place after the safe point.
 - A Host table-change request made during a round is queued. The current round completes and settles, new betting pauses, and only then does the party load the next table.
 
 ## 11. Chip economy
@@ -195,6 +196,7 @@ Discuss this with the user before treating it as settled.
 - Separate Core, blackjack, application/session, persistence, networking, presentation, and test assemblies.
 - Single-player and multiplayer use the same rules core.
 - Host authority wraps the rules core; clients cannot declare cards, random outcomes, wins, or balances.
+- The application layer distinguishes a game/rules switch from a physical table/room transition.
 - All round/action/ledger operations must be idempotent and use stable identifiers.
 - Animations consume confirmed domain events and never advance or determine game logic.
 - Use integer chip units and guarantee exact payout representation.
