@@ -129,20 +129,24 @@ namespace Casino.Tests.EditMode
         [Test]
         public void InsuranceIsAvailableOnlyAgainstDealerAceWithEnoughChips()
         {
-            var playerBlackjack = BlackjackHand.FromCards(C(CardRank.Ace), C(CardRank.King));
+            var playerHand = BlackjackHand.FromCards(C(CardRank.Ten), C(CardRank.Six));
 
             var legal = BlackjackActionValidator.GetLegalActions(
-                BlackjackActionContext.ForInsurance(playerBlackjack, 10, 5, C(CardRank.Ace)),
+                BlackjackActionContext.ForInsurance(playerHand, 10, 5, C(CardRank.Ace)),
                 Rules);
 
             var insufficient = BlackjackActionValidator.GetLegalActions(
-                BlackjackActionContext.ForInsurance(playerBlackjack, 10, 4, C(CardRank.Ace)),
+                BlackjackActionContext.ForInsurance(playerHand, 10, 4, C(CardRank.Ace)),
                 Rules);
 
             var dealerTen = BlackjackActionValidator.GetLegalActions(
-                BlackjackActionContext.ForInsurance(playerBlackjack, 10, 5, C(CardRank.Ten)),
+                BlackjackActionContext.ForInsurance(playerHand, 10, 5, C(CardRank.Ten)),
                 Rules);
 
+            Assert.That(legal.CanHit, Is.False);
+            Assert.That(legal.CanStand, Is.False);
+            Assert.That(legal.CanDoubleDown, Is.False);
+            Assert.That(legal.CanSplit, Is.False);
             Assert.That(legal.CanBuyInsurance, Is.True);
             Assert.That(legal.InsuranceWager, Is.EqualTo(5));
             Assert.That(insufficient.CanBuyInsurance, Is.False);

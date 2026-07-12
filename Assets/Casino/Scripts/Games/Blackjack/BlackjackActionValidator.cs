@@ -142,6 +142,7 @@ namespace Casino.Blackjack
 
             var evaluation = BlackjackHandEvaluator.Evaluate(context.Hand);
             var canTakeHandAction = !context.IsHandComplete
+                && !context.IsInsurancePhase
                 && !context.Hand.WasSplitFromAces
                 && !evaluation.IsBust
                 && !evaluation.IsTwentyOne;
