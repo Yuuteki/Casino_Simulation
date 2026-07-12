@@ -45,7 +45,7 @@ When the user eventually asks to resume implementation:
 - Do not build a large resort, long corridors, hotel rooms, restaurants, bars, or empty explorable areas.
 - Players do **not** walk freely and there is no free-roaming character controller.
 - Selecting a room/game plays a short entry and seating cinematic, then places the player directly at the table.
-- The exact main-menu method for selecting rooms is **pending**: it may become a fixed casino overview/floor plan or a conventional menu.
+- The main-menu method for selecting rooms is confirmed: use a fixed casino overview or floor-plan view as the primary interface, supported by a simple button menu. Do not build a freely walkable lobby or navigation hall.
 
 ## 5. Camera and embodiment
 
@@ -182,7 +182,6 @@ Discuss this with the user before treating it as settled.
 
 ## 16. Explicitly pending design decisions
 
-- Fixed casino overview/floor plan versus conventional button menu for selecting rooms
 - Fixed named AI cast versus random visitor AI
 - Exact starting chip balance, daily supply, relief amount, cooldown, and economic tuning
 - Detailed progression/reputation design
