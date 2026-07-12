@@ -65,11 +65,15 @@ When the user eventually asks to resume implementation:
   - a casino-chip head
 - During first-time onboarding, the player receives an anonymous casino invitation, chooses a blank card or chip, draws a face on it, and it becomes the character's head before the casino doors open.
 - Each player has exactly **one current hand-drawn face**.
+- The first drawing tool is intentionally lightweight and childlike, not a full drawing app.
+- Minimum drawing controls: brush, eraser, undo, clear, and a small fixed color palette.
+- The drawing canvas uses a fixed resolution such as 256x256 or 512x512; the exact size may be chosen during implementation for readability and bandwidth.
 - Drawing happens inside the game; do not add arbitrary image importing.
 - Redrawing replaces the previous face.
 - The face cannot be changed during an active game session.
-- Do not add separate neutral/win/lose faces, facial rigs, expression variants, or multiple saved face presets.
+- Do not add separate neutral/win/lose faces, facial rigs, expression variants, multiple saved face presets, layers, advanced brushes, text tools, stickers, or full image-editing features.
 - Emotion is shown through head tilt/shake/spin, body and hand animation, and simple overhead symbols.
+- In multiplayer, other players receive a compact face texture or drawing data as appearance data, not as gameplay state.
 - A local safety option may replace other users' drawings with a default face.
 
 ## 7. Party interaction
