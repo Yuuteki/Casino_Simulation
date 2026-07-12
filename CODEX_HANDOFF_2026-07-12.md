@@ -137,9 +137,12 @@ When the user eventually asks to resume implementation:
 - Practice results do not affect official balance, official records, economic statistics, achievements, or progression rewards.
 - If official chips reach zero, the player may still practice and spectate.
 - Provide a daily chip supply and a limited relief mechanism; exact amounts and timing are **pending**.
-- Direct gifting, lending, trading, and manual player-to-player transfers are forbidden.
+- Official chip balances have no product-level hard cap. Implementations still need safe integer bounds and overflow checks.
+- Betting upper limits are table/variant configuration, not a global maximum. Normal tables may define maximum bets, while any no-limit or all-in table must be explicitly selected and labeled.
+- Borrowing/relief is provided by the casino/system as personal player credit or relief, not by other players. Exact credit amounts, repayment behavior, and cooldowns are **pending**.
+- Direct player-to-player gifting, lending, trading, and manual transfers are forbidden.
 - Player-versus-player tables such as poker may legitimately move official chips between players through bets, pots, and authoritative table settlement.
-- Every chip change must reference a concrete completed game/round and a unique identifier; there is no generic transfer API.
+- Every chip change, including casino/system credit or relief, must reference a concrete source and a unique identifier; there is no generic transfer API.
 
 ## 12. First and future casino games
 

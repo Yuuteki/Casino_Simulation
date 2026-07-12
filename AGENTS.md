@@ -3,6 +3,8 @@
 ## Product constraints
 
 - This is an entertainment-only casino party game. Official in-game chips cannot be purchased, withdrawn, sold, manually transferred between players, or exchanged for anything of real-world value. Player-versus-player tables may move official chips only through authoritative game bets, pots, and settlement.
+- Official in-game chip balances have no product-level hard cap. Betting limits are table or variant configuration, not a global maximum; normal tables may still define caps, and any no-limit or all-in table must be an explicit variant.
+- If borrowing or relief exists, it is provided by the casino/system as personal player credit or relief. Player-to-player lending remains forbidden, and exact credit amounts, repayment behavior, and cooldowns are pending design decisions.
 - Multiplayer is friends-only for the current scope. A friends room is a persistent party with up to six human players; the player who creates the party is the authoritative Host. There is no dedicated gameplay server, public matchmaking, or host migration. The exact internet transport or relay service is pending.
 - The casino uses compact themed rooms. Players do not walk freely. A seating cinematic places them at a table, after which the camera remains at the seat but may rotate locally. The local player's low-detail body and hands are visible from the seated view.
 - The main room/game selection uses a fixed casino overview or floor-plan view as the primary interface, with a simple button menu as support. Do not build a freely walkable lobby or navigation hall.
@@ -19,7 +21,7 @@
 - Keep rules and economy logic in pure C# assemblies with no dependency on `UnityEngine` or networking packages.
 - The Host owns random results, legal-action validation, AI decisions, state transitions, and settlement. Clients submit intentions and render confirmed state.
 - Presentation must never determine game results. Animations consume confirmed events from the rules layer.
-- Use integer chip units. Every balance change must have a unique transaction or round identifier and be safe to apply more than once.
+- Use integer chip units. Every balance change, including casino/system credit or relief, must have a unique transaction or round identifier and be safe to apply more than once.
 - Do not implement public matchmaking, dedicated servers, host migration, real-money systems, player-to-player chip transfers, or free-roaming character movement.
 - Keep gameplay variants configurable, but implement only the rules explicitly selected in `Docs/二十一点玩法详细设计_v0.1.md`.
 
