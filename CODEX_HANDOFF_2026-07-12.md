@@ -14,6 +14,28 @@ When the user eventually asks to resume implementation:
 4. Report what Phase 1 actually contains, any conflicts with the design, and what could not be verified.
 5. Do not start the next phase until the user approves the reviewed state.
 
+## 1.1 Frozen first playable MVP
+
+After the Phase 1 review, the user approved moving to step 2: freeze the MVP scope. In immediate production planning, **MVP** now means the first playable local blackjack vertical slice, not the full friends-casino product.
+
+The first playable MVP includes:
+
+- local blackjack round state machine: betting, initial deal, dealer peek/insurance, player turns, dealer turn, settlement, and intermission
+- local official-chip balance, ledger, profile persistence, and idempotent settlement
+- basic dealer and AI player behavior sufficient for single-player blackjack
+- greybox blackjack table and screen-space UI exposing legal actions clearly
+- repeatable EditMode/unit tests plus local simulation checks before presentation-heavy work
+
+The first playable MVP explicitly excludes:
+
+- friends Host/Client networking and invite flow
+- casino overview/floor-plan navigation, compact room art, seated camera, and seating cinematic
+- avatar drawing implementation and multiplayer appearance sync
+- roulette, sic bo, poker, slots, and other games
+- final art, character models, polished animation/audio, progression, tasks, cosmetic shop, and full credit-system UI
+
+These exclusions do not cancel the broader product direction. They only define what is not part of the first playable MVP.
+
 ## 2. Project and repository
 
 - Repository: `https://github.com/Yuuteki/Casino_Simulation`

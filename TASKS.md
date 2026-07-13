@@ -4,6 +4,26 @@
 
 Goal: build a testable, Unity-independent blackjack rules core before UI, 3D scenes, animation, persistence, AI personalities, or multiplayer transport.
 
+## Frozen first playable MVP
+
+The first playable MVP is a local blackjack vertical slice. It must prove the end-to-end local loop before friends networking, casino shell, final art, or additional games.
+
+Must include:
+
+- Local blackjack round state machine.
+- Local official-chip balance, ledger, profile persistence, and idempotent settlement.
+- Basic dealer and AI player behavior for single-player blackjack.
+- Greybox table or screen-space UI for betting, actions, status, and settlement.
+- EditMode/unit tests plus local simulation checks.
+
+Out of scope for the first playable MVP:
+
+- Friends Host/Client networking, invite flow, reconnect, or host-exit handling.
+- Casino overview/floor-plan, compact 3D room, seated camera, or seating cinematic.
+- Avatar drawing implementation and multiplayer appearance sync.
+- Roulette, sic bo, poker, slots, and other games.
+- Final art, polished animation/audio, progression, tasks, cosmetic shop, and full credit-system UI.
+
 ### Phase 0 — Foundation
 
 - [x] Create Unity 6000.3 LTS URP project.
@@ -29,13 +49,20 @@ Goal: build a testable, Unity-independent blackjack rules core before UI, 3D sce
 - [ ] Add deterministic scripted random sources for reproducible tests.
 - [ ] Simulate at least 100,000 local rounds without state deadlock before presentation work.
 
+### Phase 3 — First playable local blackjack MVP
+
+- [ ] Add local official-chip profile, ledger persistence, and settlement checkpoints.
+- [ ] Add basic dealer and AI player behavior.
+- [ ] Add greybox blackjack table or screen-space UI.
+- [ ] Verify at least 100 local playable rounds from UI without state deadlock.
+
 ### Later milestones
 
-- Greybox blackjack table and screen-space UI.
-- AI players and deterministic dealer presentation.
-- Local chip ledger and atomic save files.
 - Friends-only Host/Client synchronization.
 - Seated camera, compact card room, and seating cinematic.
+- Casino overview/floor-plan navigation.
+- Credit-system UI, progression, tasks, and cosmetic shop.
+- Roulette and sic bo framework validation.
 
 ## Not now
 
