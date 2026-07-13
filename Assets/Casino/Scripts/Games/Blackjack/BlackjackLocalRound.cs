@@ -120,6 +120,8 @@ namespace Casino.Blackjack
 
         public RoundId RoundId { get; }
 
+        public BlackjackRules Rules => rules;
+
         public BlackjackRoundPhase Phase { get; private set; }
 
         public int Balance => ledger.Balance;
@@ -355,6 +357,47 @@ namespace Casino.Blackjack
             }
 
             return new BlackjackHand(dealerCards);
+        }
+
+        public LegalBlackjackActions GetLegalActionsForActiveHand()
+        {
+            if (Phase != BlackjackRoundPhase.PlayerTurns || activeHandIndex < 0)
+            {
+                throw new InvalidOperationException("There is no active player hand.");
+            }
+
+            var hand = playerHands[activeHandIndex];
+            return BlackjackActionValidator.GetLegalActions(
+                BlackjackActionContext.ForPlayerTurn(
+                    hand.Hand,
+                    hand.Wager,
+                    Balance,
+                    splitCount,
+                    hand.IsComplete),
+                rules);
+        }
+
+        public LegalBlackjackActions GetLegalActionsForInsurance()
+        {
+            if (Phase != BlackjackRoundPhase.InsuranceOrDealerPeek)
+            {
+                throw new InvalidOperationException("Insurance actions are only queried during the insurance phase.");
+            }
+
+            if (playerHands.Count == 0)
+            {
+                throw new InvalidOperationException("There is no player hand for insurance.");
+            }
+
+            var hand = playerHands[0];
+            return BlackjackActionValidator.GetLegalActions(
+                BlackjackActionContext.ForInsurance(
+                    hand.Hand,
+                    hand.Wager,
+                    Balance,
+                    DealerUpCard,
+                    insuranceWager > 0),
+                rules);
         }
 
         public RoundSettlementCheckpoint CreateSettlementCheckpoint()
