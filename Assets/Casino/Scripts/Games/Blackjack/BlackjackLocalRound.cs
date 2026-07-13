@@ -162,6 +162,8 @@ namespace Casino.Blackjack
 
         public int InsuranceWager => insuranceWager;
 
+        public int RemainingCardCount => shoe.Count;
+
         public bool HasInsuranceSettlement => hasInsuranceSettlement;
 
         public InsuranceBetSettlement InsuranceSettlement => insuranceSettlement;
@@ -357,6 +359,11 @@ namespace Casino.Blackjack
             }
 
             return new BlackjackHand(dealerCards);
+        }
+
+        public IReadOnlyList<Card> SnapshotRemainingCards()
+        {
+            return new ReadOnlyCollection<Card>(new List<Card>(shoe));
         }
 
         public LegalBlackjackActions GetLegalActionsForActiveHand()

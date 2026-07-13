@@ -1,16 +1,13 @@
 {
-  "name": "Casino.EditMode.Tests",
-  "rootNamespace": "Casino.Tests.EditMode",
+  "name": "Casino.Presentation",
+  "rootNamespace": "Casino.Presentation",
   "references": [
     "Casino.Core",
     "Casino.Blackjack",
     "Casino.Persistence",
-    "Casino.Presentation",
     "UnityEngine.UI"
   ],
-  "includePlatforms": [
-    "Editor"
-  ],
+  "includePlatforms": [],
   "excludePlatforms": [],
   "allowUnsafeCode": false,
   "overrideReferences": false,
@@ -18,8 +15,5 @@
   "autoReferenced": true,
   "defineConstraints": [],
   "versionDefines": [],
-  "optionalUnityReferences": [
-    "TestAssemblies"
-  ],
   "noEngineReferences": false
 }

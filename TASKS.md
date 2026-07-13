@@ -53,7 +53,7 @@ Out of scope for the first playable MVP:
 
 - [x] Add local official-chip profile, ledger persistence, and settlement checkpoints.
 - [x] Add basic dealer and AI player behavior.
-- [ ] Add greybox blackjack table or screen-space UI.
+- [x] Add greybox blackjack table or screen-space UI.
 - [ ] Verify at least 100 local playable rounds from UI without state deadlock.
 
 ### Later milestones
