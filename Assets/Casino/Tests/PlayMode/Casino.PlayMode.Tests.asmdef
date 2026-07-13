@@ -1,12 +1,12 @@
 {
-  "name": "Casino.Presentation",
-  "rootNamespace": "Casino.Presentation",
+  "name": "Casino.PlayMode.Tests",
+  "rootNamespace": "Casino.Tests.PlayMode",
   "references": [
     "Casino.Core",
     "Casino.Blackjack",
     "Casino.Persistence",
-    "UnityEngine.UI",
-    "Unity.InputSystem"
+    "Casino.Presentation",
+    "UnityEngine.UI"
   ],
   "includePlatforms": [],
   "excludePlatforms": [],
@@ -16,5 +16,8 @@
   "autoReferenced": true,
   "defineConstraints": [],
   "versionDefines": [],
+  "optionalUnityReferences": [
+    "TestAssemblies"
+  ],
   "noEngineReferences": false
 }

@@ -3,6 +3,7 @@ using System.Text;
 using Casino.Core.Identifiers;
 using UnityEngine;
 using UnityEngine.EventSystems;
+using UnityEngine.InputSystem.UI;
 using UnityEngine.UI;
 
 namespace Casino.Presentation.Blackjack
@@ -71,9 +72,45 @@ namespace Casino.Presentation.Blackjack
 
         public Button DeclineInsuranceButton => declineInsuranceButton;
 
+        public Button RunHundredButton => runHundredButton;
+
         private void Awake()
         {
             Initialize();
+        }
+
+        public void ConfigureStartup(int newStartingBalance, int newMinimumWager, int newMaximumWager, int newDefaultWager, int newRandomSeed)
+        {
+            if (initialized)
+            {
+                throw new InvalidOperationException("Greybox screen startup values can only be configured before initialization.");
+            }
+
+            if (newStartingBalance < 0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(newStartingBalance));
+            }
+
+            if (newMinimumWager <= 0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(newMinimumWager));
+            }
+
+            if (newMaximumWager > 0 && newMaximumWager < newMinimumWager)
+            {
+                throw new ArgumentOutOfRangeException(nameof(newMaximumWager));
+            }
+
+            if (newDefaultWager < newMinimumWager)
+            {
+                throw new ArgumentOutOfRangeException(nameof(newDefaultWager));
+            }
+
+            startingBalance = newStartingBalance;
+            minimumWager = newMinimumWager;
+            maximumWager = newMaximumWager;
+            defaultWager = newDefaultWager;
+            randomSeed = newRandomSeed;
         }
 
         public void Initialize()
@@ -460,7 +497,7 @@ namespace Casino.Presentation.Blackjack
 
             var eventSystemObject = new GameObject("EventSystem");
             eventSystemObject.AddComponent<EventSystem>();
-            eventSystemObject.AddComponent<StandaloneInputModule>();
+            eventSystemObject.AddComponent<InputSystemUIInputModule>();
         }
     }
 }
