@@ -3,7 +3,8 @@
   "rootNamespace": "Casino.Tests.EditMode",
   "references": [
     "Casino.Core",
-    "Casino.Blackjack"
+    "Casino.Blackjack",
+    "Casino.Persistence"
   ],
   "includePlatforms": [
     "Editor"

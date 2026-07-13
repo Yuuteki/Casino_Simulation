@@ -87,6 +87,7 @@ namespace Casino.Blackjack
         private readonly List<BlackjackPlayerHandState> playerHands = new List<BlackjackPlayerHandState>();
         private readonly ReadOnlyCollection<BlackjackPlayerHandState> readOnlyPlayerHands;
         private readonly List<Card> dealerCards = new List<Card>();
+        private readonly int startingBalance;
         private ChipLedger ledger;
         private int openingWager;
         private int splitCount;
@@ -111,6 +112,7 @@ namespace Casino.Blackjack
             }
 
             ledger = new ChipLedger(startingBalance);
+            this.startingBalance = startingBalance;
             shoe = new Queue<Card>(orderedCards);
             readOnlyPlayerHands = new ReadOnlyCollection<BlackjackPlayerHandState>(playerHands);
             Phase = BlackjackRoundPhase.Betting;
@@ -121,6 +123,8 @@ namespace Casino.Blackjack
         public BlackjackRoundPhase Phase { get; private set; }
 
         public int Balance => ledger.Balance;
+
+        public int StartingBalance => startingBalance;
 
         public IReadOnlyList<BlackjackPlayerHandState> PlayerHands => readOnlyPlayerHands;
 
@@ -351,6 +355,20 @@ namespace Casino.Blackjack
             }
 
             return new BlackjackHand(dealerCards);
+        }
+
+        public RoundSettlementCheckpoint CreateSettlementCheckpoint()
+        {
+            if (Phase != BlackjackRoundPhase.Intermission)
+            {
+                throw new InvalidOperationException("Settlement checkpoints can only be created after settlement.");
+            }
+
+            return new RoundSettlementCheckpoint(
+                RoundId,
+                new TransactionId(TransactionSuffix("settlement:checkpoint")),
+                startingBalance,
+                Balance);
         }
 
         private BlackjackCommandResult ApplyPlayerAction(
