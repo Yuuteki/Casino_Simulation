@@ -71,4 +71,39 @@ namespace Casino.Core.Identifiers
             return Value;
         }
     }
+
+    public readonly struct ActionId : IEquatable<ActionId>
+    {
+        public ActionId(string value)
+        {
+            if (string.IsNullOrWhiteSpace(value))
+            {
+                throw new ArgumentException("Identifier cannot be empty.", nameof(value));
+            }
+
+            Value = value;
+        }
+
+        public string Value { get; }
+
+        public bool Equals(ActionId other)
+        {
+            return string.Equals(Value, other.Value, StringComparison.Ordinal);
+        }
+
+        public override bool Equals(object obj)
+        {
+            return obj is ActionId other && Equals(other);
+        }
+
+        public override int GetHashCode()
+        {
+            return StringComparer.Ordinal.GetHashCode(Value);
+        }
+
+        public override string ToString()
+        {
+            return Value;
+        }
+    }
 }

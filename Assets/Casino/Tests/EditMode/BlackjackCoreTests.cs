@@ -243,9 +243,190 @@ namespace Casino.Tests.EditMode
             Assert.That(ledger.Balance, Is.EqualTo(115));
         }
 
+        [Test]
+        public void LocalRoundSettlesDealerNaturalAfterInsurance()
+        {
+            var round = LocalRound(
+                100,
+                C(CardRank.Ten),
+                C(CardRank.Ace, CardSuit.Hearts),
+                C(CardRank.Seven),
+                C(CardRank.King, CardSuit.Clubs));
+
+            Assert.That(round.PlaceBet(A("bet"), 10).WasApplied, Is.True);
+            Assert.That(round.Balance, Is.EqualTo(90));
+            Assert.That(round.Phase, Is.EqualTo(BlackjackRoundPhase.InitialDeal));
+
+            Assert.That(round.AdvanceAutomatic(), Is.True);
+            Assert.That(round.Phase, Is.EqualTo(BlackjackRoundPhase.InsuranceOrDealerPeek));
+
+            Assert.That(round.BuyInsurance(A("insurance")).WasApplied, Is.True);
+            Assert.That(round.Balance, Is.EqualTo(85));
+            Assert.That(round.InsuranceWager, Is.EqualTo(5));
+
+            Assert.That(round.AdvanceAutomatic(), Is.True);
+            Assert.That(round.Phase, Is.EqualTo(BlackjackRoundPhase.Settlement));
+            Assert.That(round.HasInsuranceSettlement, Is.True);
+            Assert.That(round.InsuranceSettlement.Outcome, Is.EqualTo(BlackjackInsuranceOutcome.Won));
+            Assert.That(round.Balance, Is.EqualTo(100));
+
+            Assert.That(round.AdvanceAutomatic(), Is.True);
+            Assert.That(round.Phase, Is.EqualTo(BlackjackRoundPhase.Intermission));
+            Assert.That(round.Balance, Is.EqualTo(100));
+            Assert.That(round.PlayerHands[0].Settlement.Outcome, Is.EqualTo(BlackjackMainBetOutcome.PlayerLoss));
+        }
+
+        [Test]
+        public void LocalRoundPlayerStandDealerBustPaysMainBet()
+        {
+            var round = LocalRound(
+                100,
+                C(CardRank.Ten),
+                C(CardRank.Six),
+                C(CardRank.Nine),
+                C(CardRank.Ten),
+                C(CardRank.King));
+
+            Assert.That(round.PlaceBet(A("bet"), 10).WasApplied, Is.True);
+            Assert.That(round.AdvanceAutomatic(), Is.True);
+            Assert.That(round.AdvanceAutomatic(), Is.True);
+            Assert.That(round.Phase, Is.EqualTo(BlackjackRoundPhase.PlayerTurns));
+
+            Assert.That(round.Stand(A("stand")).WasApplied, Is.True);
+            Assert.That(round.Phase, Is.EqualTo(BlackjackRoundPhase.DealerTurn));
+
+            Assert.That(round.AdvanceAutomatic(), Is.True);
+            Assert.That(round.Phase, Is.EqualTo(BlackjackRoundPhase.Settlement));
+
+            Assert.That(round.AdvanceAutomatic(), Is.True);
+            Assert.That(round.Phase, Is.EqualTo(BlackjackRoundPhase.Intermission));
+            Assert.That(round.Balance, Is.EqualTo(110));
+            Assert.That(round.PlayerHands[0].Settlement.Outcome, Is.EqualTo(BlackjackMainBetOutcome.DealerBust));
+        }
+
+        [Test]
+        public void LocalRoundDuplicateActionIdDoesNotApplyTwice()
+        {
+            var round = LocalRound(
+                100,
+                C(CardRank.Ten),
+                C(CardRank.Six),
+                C(CardRank.Nine),
+                C(CardRank.Ten));
+
+            var first = round.PlaceBet(A("bet"), 10);
+            var second = round.PlaceBet(A("bet"), 10);
+
+            Assert.That(first.Status, Is.EqualTo(BlackjackCommandStatus.Applied));
+            Assert.That(second.Status, Is.EqualTo(BlackjackCommandStatus.Duplicate));
+            Assert.That(round.Balance, Is.EqualTo(90));
+            Assert.That(round.Phase, Is.EqualTo(BlackjackRoundPhase.InitialDeal));
+        }
+
+        [Test]
+        public void LocalRoundDoubleDownReservesExtraWagerAndCompletesHand()
+        {
+            var round = LocalRound(
+                100,
+                C(CardRank.Five),
+                C(CardRank.Six),
+                C(CardRank.Six),
+                C(CardRank.Ten),
+                C(CardRank.King),
+                C(CardRank.King));
+
+            Assert.That(round.PlaceBet(A("bet"), 10).WasApplied, Is.True);
+            Assert.That(round.AdvanceAutomatic(), Is.True);
+            Assert.That(round.AdvanceAutomatic(), Is.True);
+
+            Assert.That(round.DoubleDown(A("double")).WasApplied, Is.True);
+            Assert.That(round.Balance, Is.EqualTo(80));
+            Assert.That(round.Phase, Is.EqualTo(BlackjackRoundPhase.DealerTurn));
+            Assert.That(round.PlayerHands[0].Wager, Is.EqualTo(20));
+            Assert.That(round.PlayerHands[0].Hand.Count, Is.EqualTo(3));
+
+            Assert.That(round.AdvanceAutomatic(), Is.True);
+            Assert.That(round.AdvanceAutomatic(), Is.True);
+            Assert.That(round.Phase, Is.EqualTo(BlackjackRoundPhase.Intermission));
+            Assert.That(round.Balance, Is.EqualTo(120));
+            Assert.That(round.PlayerHands[0].Settlement.Outcome, Is.EqualTo(BlackjackMainBetOutcome.DealerBust));
+        }
+
+        [Test]
+        public void LocalRoundCompletesOneHundredThousandSeededRounds()
+        {
+            for (var roundIndex = 0; roundIndex < 100000; roundIndex++)
+            {
+                var shoe = CardShoe.CreateSixDeckShoe(new SystemRandomSource(roundIndex + 1));
+                var round = new BlackjackLocalRound(
+                    new RoundId("simulation-" + roundIndex),
+                    Rules,
+                    1000,
+                    shoe.SnapshotRemainingCards());
+
+                ResolveLocalRound(round, roundIndex);
+
+                Assert.That(round.Phase, Is.EqualTo(BlackjackRoundPhase.Intermission));
+                Assert.That(round.PlayerHands[0].HasSettlement, Is.True);
+                Assert.That(round.Balance, Is.GreaterThanOrEqualTo(0));
+            }
+        }
+
         private static Card C(CardRank rank, CardSuit suit = CardSuit.Spades)
         {
             return new Card(suit, rank);
+        }
+
+        private static BlackjackLocalRound LocalRound(int startingBalance, params Card[] orderedCards)
+        {
+            return new BlackjackLocalRound(new RoundId("test-round"), Rules, startingBalance, orderedCards);
+        }
+
+        private static ActionId A(string value)
+        {
+            return new ActionId(value);
+        }
+
+        private static void ResolveLocalRound(BlackjackLocalRound round, int roundIndex)
+        {
+            var playerActionIndex = 0;
+            for (var safety = 0; safety < 100; safety++)
+            {
+                switch (round.Phase)
+                {
+                    case BlackjackRoundPhase.Betting:
+                        Assert.That(round.PlaceBet(A(roundIndex + ":bet"), 2).WasApplied, Is.True);
+                        break;
+                    case BlackjackRoundPhase.InitialDeal:
+                    case BlackjackRoundPhase.DealerTurn:
+                    case BlackjackRoundPhase.Settlement:
+                        Assert.That(round.AdvanceAutomatic(), Is.True);
+                        break;
+                    case BlackjackRoundPhase.InsuranceOrDealerPeek:
+                        if (round.DealerUpCard.Rank == CardRank.Ace)
+                        {
+                            Assert.That(round.DeclineInsurance(A(roundIndex + ":insurance")).WasApplied, Is.True);
+                        }
+
+                        Assert.That(round.AdvanceAutomatic(), Is.True);
+                        break;
+                    case BlackjackRoundPhase.PlayerTurns:
+                        var total = round.ActiveHand.Hand.Evaluation.Total;
+                        var actionId = A(roundIndex + ":player:" + playerActionIndex);
+                        playerActionIndex++;
+
+                        var result = total < 17
+                            ? round.Hit(actionId)
+                            : round.Stand(actionId);
+
+                        Assert.That(result.WasApplied, Is.True, result.RejectionReason);
+                        break;
+                    case BlackjackRoundPhase.Intermission:
+                        return;
+                }
+            }
+
+            Assert.Fail("Local round did not reach intermission within the safety limit.");
         }
     }
 }

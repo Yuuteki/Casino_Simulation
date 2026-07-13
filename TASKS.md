@@ -33,21 +33,21 @@ Out of scope for the first playable MVP:
 
 ### Phase 1 — Pure C# card and blackjack core
 
-- [ ] Create assembly definitions for `Casino.Core`, `Casino.Blackjack`, and edit-mode tests.
-- [ ] Implement immutable card suit, rank, and card value types.
-- [ ] Implement injectable random source and six-deck shoe with Fisher–Yates shuffle.
-- [ ] Implement blackjack hand evaluation, including multiple aces, soft totals, bust, and natural blackjack.
-- [ ] Implement dealer S17 decision rules.
-- [ ] Implement legal-action checks for hit, stand, double, split, and insurance.
-- [ ] Implement win, loss, push, blackjack, and insurance settlement using integer chips.
-- [ ] Add edit-mode tests for all selected rules and edge cases.
+- [x] Create assembly definitions for `Casino.Core`, `Casino.Blackjack`, and edit-mode tests.
+- [x] Implement immutable card suit, rank, and card value types.
+- [x] Implement injectable random source and six-deck shoe with Fisher–Yates shuffle.
+- [x] Implement blackjack hand evaluation, including multiple aces, soft totals, bust, and natural blackjack.
+- [x] Implement dealer S17 decision rules.
+- [x] Implement legal-action checks for hit, stand, double, split, and insurance.
+- [x] Implement win, loss, push, blackjack, and insurance settlement using integer chips.
+- [x] Add edit-mode tests for all selected rules and edge cases.
 
 ### Phase 2 — Local round state machine
 
-- [ ] Implement betting, initial deal, dealer peek, insurance, player turns, dealer turn, settlement, and intermission states.
-- [ ] Add unique round and action identifiers with duplicate-request protection.
-- [ ] Add deterministic scripted random sources for reproducible tests.
-- [ ] Simulate at least 100,000 local rounds without state deadlock before presentation work.
+- [x] Implement betting, initial deal, dealer peek, insurance, player turns, dealer turn, settlement, and intermission states.
+- [x] Add unique round and action identifiers with duplicate-request protection.
+- [x] Add deterministic scripted random sources for reproducible tests.
+- [x] Simulate at least 100,000 local rounds without state deadlock before presentation work.
 
 ### Phase 3 — First playable local blackjack MVP
 
