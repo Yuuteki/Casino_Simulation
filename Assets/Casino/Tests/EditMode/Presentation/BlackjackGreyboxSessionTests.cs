@@ -85,6 +85,11 @@ namespace Casino.Tests.EditMode.Presentation
                 Assert.That(screen.DealButton.interactable, Is.True);
                 Assert.That(screen.HitButton.interactable, Is.False);
                 Assert.That(screen.StandButton.interactable, Is.False);
+                Assert.That(screenObject.transform.Find("Blackjack Greybox Canvas/Background"), Is.Null);
+
+                var tablePanel = screenObject.transform.Find("Blackjack Greybox Canvas/Table Panel");
+                Assert.That(tablePanel, Is.Not.Null);
+                Assert.That(tablePanel.GetComponent<RectTransform>().anchorMax.x, Is.LessThan(0.5f));
             }
             finally
             {

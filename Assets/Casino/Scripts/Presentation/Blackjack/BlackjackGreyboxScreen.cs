@@ -4,15 +4,23 @@ using Casino.Core.Identifiers;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.InputSystem.UI;
+using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 namespace Casino.Presentation.Blackjack
 {
     public sealed class BlackjackGreyboxRuntimeBootstrap
     {
+        private const string GreyboxSceneName = "BlackjackGreybox";
+
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
         private static void CreateGreyboxScreen()
         {
+            if (!string.Equals(SceneManager.GetActiveScene().name, GreyboxSceneName, StringComparison.Ordinal))
+            {
+                return;
+            }
+
             if (UnityEngine.Object.FindFirstObjectByType<BlackjackGreyboxScreen>() != null)
             {
                 return;
@@ -150,7 +158,7 @@ namespace Casino.Presentation.Blackjack
             dealerText.text = BlackjackGreyboxFormatting.FormatDealer(round);
             playerText.text = BlackjackGreyboxFormatting.FormatPlayerHands(round);
             settlementText.text = BuildSettlementText();
-            wagerText.text = "Wager: " + selectedWager;
+            wagerText.text = "下注: " + selectedWager;
             logText.text = BuildLogText();
 
             var legal = session.LegalActions;
@@ -172,7 +180,7 @@ namespace Casino.Presentation.Blackjack
                 && (round.Phase != Casino.Blackjack.BlackjackRoundPhase.Intermission || session.Profile.OfficialChipBalance >= session.MinimumWager);
             runHundredButton.interactable = session.Profile.OfficialChipBalance >= session.MinimumWager;
 
-            SetButtonLabel(dealButton, round != null && round.Phase == Casino.Blackjack.BlackjackRoundPhase.Intermission ? "Deal Next" : "Deal");
+            SetButtonLabel(dealButton, round != null && round.Phase == Casino.Blackjack.BlackjackRoundPhase.Intermission ? "下一局" : "发牌");
         }
 
         private void BuildInterface()
@@ -189,68 +197,58 @@ namespace Casino.Presentation.Blackjack
             canvasObject.AddComponent<GraphicRaycaster>();
             canvasRoot = canvasObject.GetComponent<RectTransform>();
 
-            var background = AddPanel(
-                "Background",
-                canvasRoot,
-                Vector2.zero,
-                Vector2.one,
-                Vector2.zero,
-                Vector2.zero,
-                new Color32(19, 29, 32, 255));
-            background.SetAsFirstSibling();
-
             var topPanel = AddPanel(
                 "Status Panel",
                 canvasRoot,
-                new Vector2(0.02f, 0.78f),
+                new Vector2(0.02f, 0.84f),
                 new Vector2(0.98f, 0.98f),
                 Vector2.zero,
                 Vector2.zero,
-                new Color32(32, 47, 51, 240));
-            AddVerticalLayout(topPanel, 14, 10);
+                new Color32(32, 47, 51, 210));
+            AddVerticalLayout(topPanel, 12, 6);
             headerText = AddText("Header", topPanel, 24, TextAnchor.MiddleLeft, new Color32(239, 234, 215, 255));
             statusText = AddText("Status", topPanel, 20, TextAnchor.MiddleLeft, new Color32(241, 191, 94, 255));
 
             var tablePanel = AddPanel(
                 "Table Panel",
                 canvasRoot,
-                new Vector2(0.02f, 0.27f),
-                new Vector2(0.98f, 0.76f),
+                new Vector2(0.02f, 0.32f),
+                new Vector2(0.39f, 0.82f),
                 Vector2.zero,
                 Vector2.zero,
-                new Color32(24, 89, 69, 240));
-            AddVerticalLayout(tablePanel, 16, 14);
-            dealerText = AddText("Dealer", tablePanel, 28, TextAnchor.MiddleCenter, new Color32(255, 248, 221, 255));
-            playerText = AddText("Player", tablePanel, 26, TextAnchor.MiddleCenter, new Color32(226, 239, 235, 255));
-            settlementText = AddText("Settlement", tablePanel, 20, TextAnchor.MiddleCenter, new Color32(241, 191, 94, 255));
+                new Color32(24, 89, 69, 185));
+            AddVerticalLayout(tablePanel, 12, 8);
+            dealerText = AddText("Dealer", tablePanel, 24, TextAnchor.MiddleLeft, new Color32(255, 248, 221, 255));
+            playerText = AddText("Player", tablePanel, 22, TextAnchor.MiddleLeft, new Color32(226, 239, 235, 255));
+            settlementText = AddText("Settlement", tablePanel, 18, TextAnchor.MiddleLeft, new Color32(241, 191, 94, 255));
 
             var actionPanel = AddPanel(
                 "Action Panel",
                 canvasRoot,
                 new Vector2(0.02f, 0.02f),
-                new Vector2(0.98f, 0.25f),
+                new Vector2(0.98f, 0.24f),
                 Vector2.zero,
                 Vector2.zero,
-                new Color32(38, 38, 45, 245));
+                new Color32(38, 38, 45, 220));
             AddVerticalLayout(actionPanel, 12, 8);
 
             var wagerRow = AddRow("Wager Row", actionPanel);
             lowerWagerButton = AddButton("Lower Wager", wagerRow, "-10", OnLowerWager);
             wagerText = AddText("Wager Text", wagerRow, 22, TextAnchor.MiddleCenter, new Color32(239, 234, 215, 255));
             raiseWagerButton = AddButton("Raise Wager", wagerRow, "+10", OnRaiseWager);
-            dealButton = AddButton("Deal Button", wagerRow, "Deal", OnDeal);
+            dealButton = AddButton("Deal Button", wagerRow, "发牌", OnDeal);
 
             var actionRow = AddRow("Player Action Row", actionPanel);
-            hitButton = AddButton("Hit Button", actionRow, "Hit", OnHit);
-            standButton = AddButton("Stand Button", actionRow, "Stand", OnStand);
-            doubleButton = AddButton("Double Button", actionRow, "Double", OnDouble);
-            splitButton = AddButton("Split Button", actionRow, "Split", OnSplit);
-            buyInsuranceButton = AddButton("Insurance Button", actionRow, "Insurance", OnBuyInsurance);
-            declineInsuranceButton = AddButton("No Insurance Button", actionRow, "No Insurance", OnDeclineInsurance);
+            hitButton = AddButton("Hit Button", actionRow, "要牌", OnHit);
+            standButton = AddButton("Stand Button", actionRow, "停牌", OnStand);
+            doubleButton = AddButton("Double Button", actionRow, "加倍", OnDouble);
+            splitButton = AddButton("Split Button", actionRow, "分牌", OnSplit);
+            buyInsuranceButton = AddButton("Insurance Button", actionRow, "保险", OnBuyInsurance);
+            declineInsuranceButton = AddButton("No Insurance Button", actionRow, "不保险", OnDeclineInsurance);
 
             var debugRow = AddRow("Debug Row", actionPanel);
-            aiFinishButton = AddButton("AI Finish Button", debugRow, "AI Finish", OnAiFinish);
-            runHundredButton = AddButton("Run 100 Button", debugRow, "Run 100 AI", OnRunHundred);
+            aiFinishButton = AddButton("AI Finish Button", debugRow, "AI 打完", OnAiFinish);
+            runHundredButton = AddButton("Run 100 Button", debugRow, "调试 100 局", OnRunHundred);
             logText = AddText("Debug Log", debugRow, 16, TextAnchor.MiddleLeft, new Color32(203, 213, 205, 255));
         }
 
@@ -395,6 +393,7 @@ namespace Casino.Presentation.Blackjack
             rect.offsetMax = offsetMax;
             var image = panelObject.AddComponent<Image>();
             image.color = color;
+            image.raycastTarget = false;
             return rect;
         }
 
