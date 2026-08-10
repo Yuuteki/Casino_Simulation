@@ -1,5 +1,6 @@
 using Casino.Presentation.Blackjack;
 using NUnit.Framework;
+using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine;
 
@@ -33,6 +34,12 @@ namespace Casino.Tests.EditMode.Presentation
             AssertSeat(root.transform, "Seat_3_FarLeft");
             AssertSeat(root.transform, "Seat_4_FarRight");
             AssertSeat(root.transform, "Seat_5_RightNear");
+
+            Assert.That(
+                AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Casino/Prefabs/Blackjack/Chip.prefab"),
+                Is.Not.Null);
+            var chipStack = AssertRequiredTransform(root.transform, "Seats/Seat_0_Local/ChipStackAnchor/Chip_Sample_Stack");
+            Assert.That(chipStack.childCount, Is.EqualTo(3));
 
             var screen = root.transform.Find("UI/BlackjackGreyboxScreen");
             Assert.That(screen, Is.Not.Null);
