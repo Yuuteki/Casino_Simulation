@@ -141,6 +141,55 @@ namespace Casino.Tests.EditMode.Presentation
             }
         }
 
+        [Test]
+        public void ScreenDealsCardsOntoSceneTableZones()
+        {
+            EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
+            var root = CreateCardZoneSceneFixture();
+            var screenObject = new GameObject("Greybox Card Screen Test");
+            try
+            {
+                var screen = screenObject.AddComponent<BlackjackGreyboxScreen>();
+                screen.Initialize();
+                screen.Session.UseOrderedCardsForNextRound(
+                    new[]
+                    {
+                        C(CardRank.Ten),
+                        C(CardRank.Six),
+                        C(CardRank.Nine),
+                        C(CardRank.King),
+                        C(CardRank.King)
+                    });
+                screen.Refresh();
+
+                screen.DealButton.onClick.Invoke();
+
+                Assert.That(screen.VisibleTablePlayerCardCount, Is.EqualTo(2));
+                Assert.That(screen.VisibleTableDealerCardCount, Is.EqualTo(1));
+                Assert.That(screen.HiddenTableDealerCardCount, Is.EqualTo(1));
+                AssertGeneratedCardCount(root.transform, "Seats/Seat_0_Local/CardZone/Greybox_Card_View", 2);
+                AssertGeneratedCardCount(root.transform, "Dealer/Dealer_CardZone/Greybox_Card_View", 2);
+
+                screen.StandButton.onClick.Invoke();
+
+                Assert.That(screen.HiddenTableDealerCardCount, Is.EqualTo(0));
+                Assert.That(screen.VisibleTableDealerCardCount, Is.EqualTo(3));
+                AssertGeneratedCardCount(root.transform, "Dealer/Dealer_CardZone/Greybox_Card_View", 3);
+            }
+            finally
+            {
+                Object.DestroyImmediate(screenObject);
+                Object.DestroyImmediate(root);
+                var eventSystem = Object.FindFirstObjectByType<EventSystem>();
+                if (eventSystem != null)
+                {
+                    Object.DestroyImmediate(eventSystem.gameObject);
+                }
+
+                EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
+            }
+        }
+
         private static BlackjackGreyboxTableSession SessionWithCards(int startingBalance, params Card[] cards)
         {
             var session = new BlackjackGreyboxTableSession(
@@ -177,6 +226,23 @@ namespace Casino.Tests.EditMode.Presentation
             return root;
         }
 
+        private static GameObject CreateCardZoneSceneFixture()
+        {
+            var root = new GameObject("Blackjack_Greybox_Root");
+            var dealer = new GameObject("Dealer");
+            dealer.transform.SetParent(root.transform, false);
+            var dealerCardZone = new GameObject("Dealer_CardZone");
+            dealerCardZone.transform.SetParent(dealer.transform, false);
+
+            var seats = new GameObject("Seats");
+            seats.transform.SetParent(root.transform, false);
+            var seat = new GameObject("Seat_0_Local");
+            seat.transform.SetParent(seats.transform, false);
+            var playerCardZone = new GameObject("CardZone");
+            playerCardZone.transform.SetParent(seat.transform, false);
+            return root;
+        }
+
         private static void AssertVisibleChipCount(Transform root, int expected)
         {
             var stack = root.Find("Seats/Seat_0_Local/ChipStackAnchor/Chip_Sample_Stack");
@@ -192,6 +258,13 @@ namespace Casino.Tests.EditMode.Presentation
             }
 
             Assert.That(visible, Is.EqualTo(expected));
+        }
+
+        private static void AssertGeneratedCardCount(Transform root, string relativePath, int expected)
+        {
+            var generatedRoot = root.Find(relativePath);
+            Assert.That(generatedRoot, Is.Not.Null);
+            Assert.That(generatedRoot.childCount, Is.EqualTo(expected));
         }
 
     }

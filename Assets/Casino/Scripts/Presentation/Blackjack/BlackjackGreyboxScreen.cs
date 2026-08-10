@@ -62,6 +62,7 @@ namespace Casino.Presentation.Blackjack
         private Button aiFinishButton;
         private Button runHundredButton;
         private BlackjackGreyboxChipStackView chipStackView;
+        private BlackjackGreyboxCardTableView cardTableView;
         private int selectedWager;
         private bool initialized;
 
@@ -88,6 +89,12 @@ namespace Casino.Presentation.Blackjack
         public Button LowerWagerButton => lowerWagerButton;
 
         public int VisibleWagerChipCount => chipStackView != null ? chipStackView.VisibleChipCount : 0;
+
+        public int VisibleTablePlayerCardCount => cardTableView != null ? cardTableView.VisiblePlayerCardCount : 0;
+
+        public int VisibleTableDealerCardCount => cardTableView != null ? cardTableView.VisibleDealerCardCount : 0;
+
+        public int HiddenTableDealerCardCount => cardTableView != null ? cardTableView.HiddenDealerCardCount : 0;
 
         private void Awake()
         {
@@ -150,6 +157,7 @@ namespace Casino.Presentation.Blackjack
             EnsureEventSystem();
             BuildInterface();
             chipStackView = BlackjackGreyboxChipStackView.TryFindLocalPlayerStack();
+            cardTableView = BlackjackGreyboxCardTableView.TryFindLocalTable();
             Refresh();
         }
 
@@ -190,6 +198,7 @@ namespace Casino.Presentation.Blackjack
 
             SetButtonLabel(dealButton, round != null && round.Phase == Casino.Blackjack.BlackjackRoundPhase.Intermission ? "下一局" : "发牌");
             chipStackView?.SetWager(GetVisibleTableWager(round), session.MinimumWager);
+            cardTableView?.Render(round);
         }
 
         private void BuildInterface()
