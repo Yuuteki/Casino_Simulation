@@ -61,6 +61,7 @@ namespace Casino.Presentation.Blackjack
         private Button declineInsuranceButton;
         private Button aiFinishButton;
         private Button runHundredButton;
+        private BlackjackGreyboxChipStackView chipStackView;
         private int selectedWager;
         private bool initialized;
 
@@ -81,6 +82,12 @@ namespace Casino.Presentation.Blackjack
         public Button DeclineInsuranceButton => declineInsuranceButton;
 
         public Button RunHundredButton => runHundredButton;
+
+        public Button RaiseWagerButton => raiseWagerButton;
+
+        public Button LowerWagerButton => lowerWagerButton;
+
+        public int VisibleWagerChipCount => chipStackView != null ? chipStackView.VisibleChipCount : 0;
 
         private void Awake()
         {
@@ -142,6 +149,7 @@ namespace Casino.Presentation.Blackjack
 
             EnsureEventSystem();
             BuildInterface();
+            chipStackView = BlackjackGreyboxChipStackView.TryFindLocalPlayerStack();
             Refresh();
         }
 
@@ -181,6 +189,7 @@ namespace Casino.Presentation.Blackjack
             runHundredButton.interactable = session.Profile.OfficialChipBalance >= session.MinimumWager;
 
             SetButtonLabel(dealButton, round != null && round.Phase == Casino.Blackjack.BlackjackRoundPhase.Intermission ? "下一局" : "发牌");
+            chipStackView?.SetWager(GetVisibleTableWager(round), session.MinimumWager);
         }
 
         private void BuildInterface()
@@ -304,6 +313,27 @@ namespace Casino.Presentation.Blackjack
             var balance = session.Round != null ? session.Round.Balance : session.Profile.OfficialChipBalance;
             var cap = session.MaximumWager > 0 ? Math.Min(session.MaximumWager, balance) : balance;
             return Math.Max(session.MinimumWager, cap);
+        }
+
+        private int GetVisibleTableWager(Casino.Blackjack.BlackjackLocalRound round)
+        {
+            if (round == null)
+            {
+                return 0;
+            }
+
+            if (round.Phase == Casino.Blackjack.BlackjackRoundPhase.Betting)
+            {
+                return Math.Min(selectedWager, GetCurrentWagerCap());
+            }
+
+            var totalWager = 0;
+            for (var index = 0; index < round.PlayerHands.Count; index++)
+            {
+                totalWager += round.PlayerHands[index].Wager;
+            }
+
+            return totalWager > 0 ? totalWager : selectedWager;
         }
 
         private void OnLowerWager()

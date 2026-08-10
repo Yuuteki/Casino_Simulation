@@ -3,6 +3,7 @@ using Casino.Core.Cards;
 using Casino.Core.Identifiers;
 using Casino.Presentation.Blackjack;
 using NUnit.Framework;
+using UnityEditor.SceneManagement;
 using UnityEngine;
 using UnityEngine.EventSystems;
 
@@ -102,6 +103,44 @@ namespace Casino.Tests.EditMode.Presentation
             }
         }
 
+        [Test]
+        public void ScreenUpdatesSceneChipStackFromSelectedWager()
+        {
+            EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
+            var root = CreateChipStackSceneFixture();
+            var screenObject = new GameObject("Greybox Chip Screen Test");
+            try
+            {
+                var screen = screenObject.AddComponent<BlackjackGreyboxScreen>();
+                screen.Initialize();
+
+                Assert.That(screen.VisibleWagerChipCount, Is.EqualTo(1));
+                AssertVisibleChipCount(root.transform, 1);
+
+                screen.RaiseWagerButton.onClick.Invoke();
+
+                Assert.That(screen.VisibleWagerChipCount, Is.EqualTo(2));
+                AssertVisibleChipCount(root.transform, 2);
+
+                screen.DealButton.onClick.Invoke();
+
+                Assert.That(screen.VisibleWagerChipCount, Is.EqualTo(2));
+                AssertVisibleChipCount(root.transform, 2);
+            }
+            finally
+            {
+                Object.DestroyImmediate(screenObject);
+                Object.DestroyImmediate(root);
+                var eventSystem = Object.FindFirstObjectByType<EventSystem>();
+                if (eventSystem != null)
+                {
+                    Object.DestroyImmediate(eventSystem.gameObject);
+                }
+
+                EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
+            }
+        }
+
         private static BlackjackGreyboxTableSession SessionWithCards(int startingBalance, params Card[] cards)
         {
             var session = new BlackjackGreyboxTableSession(
@@ -120,5 +159,40 @@ namespace Casino.Tests.EditMode.Presentation
         {
             return new Card(suit, rank);
         }
+
+        private static GameObject CreateChipStackSceneFixture()
+        {
+            var root = new GameObject("Blackjack_Greybox_Root");
+            var seats = new GameObject("Seats");
+            seats.transform.SetParent(root.transform, false);
+            var seat = new GameObject("Seat_0_Local");
+            seat.transform.SetParent(seats.transform, false);
+            var anchor = new GameObject("ChipStackAnchor");
+            anchor.transform.SetParent(seat.transform, false);
+            var stack = new GameObject("Chip_Sample_Stack");
+            stack.transform.SetParent(anchor.transform, false);
+            var chip = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            chip.name = "Chip_0";
+            chip.transform.SetParent(stack.transform, false);
+            return root;
+        }
+
+        private static void AssertVisibleChipCount(Transform root, int expected)
+        {
+            var stack = root.Find("Seats/Seat_0_Local/ChipStackAnchor/Chip_Sample_Stack");
+            Assert.That(stack, Is.Not.Null);
+
+            var visible = 0;
+            for (var index = 0; index < stack.childCount; index++)
+            {
+                if (stack.GetChild(index).gameObject.activeSelf)
+                {
+                    visible++;
+                }
+            }
+
+            Assert.That(visible, Is.EqualTo(expected));
+        }
+
     }
 }
