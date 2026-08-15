@@ -63,6 +63,7 @@ namespace Casino.Presentation.Blackjack
         private Button runHundredButton;
         private BlackjackGreyboxChipStackView chipStackView;
         private BlackjackGreyboxCardTableView cardTableView;
+        private BlackjackGreyboxTableActionView tableActionView;
         private int selectedWager;
         private bool initialized;
 
@@ -95,6 +96,12 @@ namespace Casino.Presentation.Blackjack
         public int VisibleTableDealerCardCount => cardTableView != null ? cardTableView.VisibleDealerCardCount : 0;
 
         public int HiddenTableDealerCardCount => cardTableView != null ? cardTableView.HiddenDealerCardCount : 0;
+
+        public Button TableDealButton => tableActionView != null ? tableActionView.DealButton : null;
+
+        public Button TableHitButton => tableActionView != null ? tableActionView.HitButton : null;
+
+        public Button TableStandButton => tableActionView != null ? tableActionView.StandButton : null;
 
         private void Awake()
         {
@@ -158,6 +165,8 @@ namespace Casino.Presentation.Blackjack
             BuildInterface();
             chipStackView = BlackjackGreyboxChipStackView.TryFindLocalPlayerStack();
             cardTableView = BlackjackGreyboxCardTableView.TryFindLocalTable();
+            tableActionView = BlackjackGreyboxTableActionView.TryFindLocalSeat(defaultFont, OnDeal, OnHit, OnStand);
+            SetScreenPrimaryActionsVisible(tableActionView == null);
             Refresh();
         }
 
@@ -197,8 +206,20 @@ namespace Casino.Presentation.Blackjack
             runHundredButton.interactable = session.Profile.OfficialChipBalance >= session.MinimumWager;
 
             SetButtonLabel(dealButton, round != null && round.Phase == Casino.Blackjack.BlackjackRoundPhase.Intermission ? "下一局" : "发牌");
+            tableActionView?.SetState(
+                dealButton.interactable,
+                hitButton.interactable,
+                standButton.interactable,
+                round != null && round.Phase == Casino.Blackjack.BlackjackRoundPhase.Intermission);
             chipStackView?.SetWager(GetVisibleTableWager(round), session.MinimumWager);
             cardTableView?.Render(round);
+        }
+
+        private void SetScreenPrimaryActionsVisible(bool visible)
+        {
+            dealButton.gameObject.SetActive(visible);
+            hitButton.gameObject.SetActive(visible);
+            standButton.gameObject.SetActive(visible);
         }
 
         private void BuildInterface()

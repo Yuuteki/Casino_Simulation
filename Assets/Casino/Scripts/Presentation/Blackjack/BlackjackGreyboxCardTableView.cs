@@ -14,6 +14,9 @@ namespace Casino.Presentation.Blackjack
         private readonly Transform playerRoot;
         private readonly Material faceMaterial;
         private readonly Material backMaterial;
+        private BlackjackLocalRound renderedRound;
+        private int renderedPlayerCardCount;
+        private int renderedDealerCardCount;
 
         private BlackjackGreyboxCardTableView(Transform dealerRoot, Transform playerRoot)
         {
@@ -45,6 +48,9 @@ namespace Casino.Presentation.Blackjack
 
         public void Render(BlackjackLocalRound round)
         {
+            var isSameRound = ReferenceEquals(renderedRound, round);
+            var previousPlayerCardCount = isSameRound ? renderedPlayerCardCount : 0;
+            var previousDealerCardCount = isSameRound ? renderedDealerCardCount : 0;
             ClearGeneratedCards(dealerRoot);
             ClearGeneratedCards(playerRoot);
             VisiblePlayerCardCount = 0;
@@ -53,14 +59,21 @@ namespace Casino.Presentation.Blackjack
 
             if (round == null || round.Phase == BlackjackRoundPhase.Betting)
             {
+                renderedRound = round;
+                renderedPlayerCardCount = 0;
+                renderedDealerCardCount = 0;
                 return;
             }
 
-            RenderDealerCards(round);
-            RenderPlayerHands(round);
+            var isInitialDeal = previousPlayerCardCount == 0 && previousDealerCardCount == 0;
+            RenderDealerCards(round, previousDealerCardCount, isInitialDeal);
+            RenderPlayerHands(round, previousPlayerCardCount, isInitialDeal);
+            renderedRound = round;
+            renderedPlayerCardCount = VisiblePlayerCardCount;
+            renderedDealerCardCount = round.DealerCards.Count;
         }
 
-        private void RenderDealerCards(BlackjackLocalRound round)
+        private void RenderDealerCards(BlackjackLocalRound round, int previousCardCount, bool isInitialDeal)
         {
             var revealHole = IsDealerHoleRevealed(round.Phase);
             for (var index = 0; index < round.DealerCards.Count; index++)
@@ -73,7 +86,9 @@ namespace Casino.Presentation.Blackjack
                     0,
                     isHiddenHole ? null : round.DealerCards[index],
                     isHiddenHole,
-                    false);
+                    false,
+                    index >= previousCardCount,
+                    isInitialDeal ? index * 0.12f + 0.06f : (index - previousCardCount) * 0.08f);
 
                 if (isHiddenHole)
                 {
@@ -86,8 +101,9 @@ namespace Casino.Presentation.Blackjack
             }
         }
 
-        private void RenderPlayerHands(BlackjackLocalRound round)
+        private void RenderPlayerHands(BlackjackLocalRound round, int previousCardCount, bool isInitialDeal)
         {
+            var renderedCardIndex = 0;
             for (var handIndex = 0; handIndex < round.PlayerHands.Count; handIndex++)
             {
                 var hand = round.PlayerHands[handIndex].Hand;
@@ -101,8 +117,11 @@ namespace Casino.Presentation.Blackjack
                         handIndex,
                         hand.Cards[cardIndex],
                         false,
-                        isActiveHand);
+                        isActiveHand,
+                        renderedCardIndex >= previousCardCount,
+                        isInitialDeal ? cardIndex * 0.12f : (renderedCardIndex - previousCardCount) * 0.08f);
                     VisiblePlayerCardCount++;
+                    renderedCardIndex++;
                 }
             }
         }
@@ -114,7 +133,9 @@ namespace Casino.Presentation.Blackjack
             int handIndex,
             Card? card,
             bool isFaceDown,
-            bool isActiveHand)
+            bool isActiveHand,
+            bool animate,
+            float animationDelay)
         {
             var cardObject = new GameObject(objectName);
             cardObject.name = objectName;
@@ -137,6 +158,18 @@ namespace Casino.Presentation.Blackjack
             }
 
             AddLabel(cardObject.transform, isFaceDown ? "HOLE" : FormatCard(card.Value), isFaceDown ? Color.white : TextColor(card.Value));
+
+            if (animate)
+            {
+                var destination = cardObject.transform.position;
+                var motion = cardObject.AddComponent<BlackjackGreyboxCardMotion>();
+                motion.Begin(GetDealSourceWorldPosition(), destination, animationDelay);
+            }
+        }
+
+        private Vector3 GetDealSourceWorldPosition()
+        {
+            return dealerRoot.position + Vector3.right * 0.82f + Vector3.up * 0.34f;
         }
 
         private static void AddLabel(Transform parent, string label, Color color)
@@ -185,6 +218,7 @@ namespace Casino.Presentation.Blackjack
                 var child = root.GetChild(index);
                 if (Application.isPlaying)
                 {
+                    child.gameObject.SetActive(false);
                     Object.Destroy(child.gameObject);
                 }
                 else

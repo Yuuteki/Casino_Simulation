@@ -162,19 +162,77 @@ namespace Casino.Tests.EditMode.Presentation
                     });
                 screen.Refresh();
 
-                screen.DealButton.onClick.Invoke();
+                Assert.That(screen.TableDealButton, Is.Not.Null);
+                Assert.That(screen.TableHitButton, Is.Not.Null);
+                Assert.That(screen.TableStandButton, Is.Not.Null);
+                Assert.That(screen.TableDealButton.interactable, Is.True);
+                Assert.That(screen.DealButton.gameObject.activeSelf, Is.False);
+                Assert.That(screen.HitButton.gameObject.activeSelf, Is.False);
+                Assert.That(screen.StandButton.gameObject.activeSelf, Is.False);
+                Assert.That(root.transform.Find("Seats/Seat_0_Local/ActionPromptAnchor/Greybox_Table_Actions"), Is.Not.Null);
+
+                screen.TableDealButton.onClick.Invoke();
 
                 Assert.That(screen.VisibleTablePlayerCardCount, Is.EqualTo(2));
                 Assert.That(screen.VisibleTableDealerCardCount, Is.EqualTo(1));
                 Assert.That(screen.HiddenTableDealerCardCount, Is.EqualTo(1));
                 AssertGeneratedCardCount(root.transform, "Seats/Seat_0_Local/CardZone/Greybox_Card_View", 2);
                 AssertGeneratedCardCount(root.transform, "Dealer/Dealer_CardZone/Greybox_Card_View", 2);
+                Assert.That(screen.TableDealButton.interactable, Is.False);
+                Assert.That(screen.TableHitButton.interactable, Is.True);
+                Assert.That(screen.TableStandButton.interactable, Is.True);
+                var firstPlayerCard = root.transform.Find("Seats/Seat_0_Local/CardZone/Greybox_Card_View").GetChild(0);
+                Assert.That(firstPlayerCard.GetComponent<BlackjackGreyboxCardMotion>(), Is.Not.Null);
 
-                screen.StandButton.onClick.Invoke();
+                screen.TableStandButton.onClick.Invoke();
 
                 Assert.That(screen.HiddenTableDealerCardCount, Is.EqualTo(0));
                 Assert.That(screen.VisibleTableDealerCardCount, Is.EqualTo(3));
                 AssertGeneratedCardCount(root.transform, "Dealer/Dealer_CardZone/Greybox_Card_View", 3);
+            }
+            finally
+            {
+                Object.DestroyImmediate(screenObject);
+                Object.DestroyImmediate(root);
+                var eventSystem = Object.FindFirstObjectByType<EventSystem>();
+                if (eventSystem != null)
+                {
+                    Object.DestroyImmediate(eventSystem.gameObject);
+                }
+
+                EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
+            }
+        }
+
+        [Test]
+        public void TableHitButtonAddsConfirmedCardToPlayerZone()
+        {
+            EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
+            var root = CreateCardZoneSceneFixture();
+            var screenObject = new GameObject("Greybox Table Hit Test");
+            try
+            {
+                var screen = screenObject.AddComponent<BlackjackGreyboxScreen>();
+                screen.Initialize();
+                screen.Session.UseOrderedCardsForNextRound(
+                    new[]
+                    {
+                        C(CardRank.Five),
+                        C(CardRank.Nine),
+                        C(CardRank.Six),
+                        C(CardRank.Seven),
+                        C(CardRank.Two),
+                        C(CardRank.King)
+                    });
+                screen.Refresh();
+
+                screen.TableDealButton.onClick.Invoke();
+                screen.TableHitButton.onClick.Invoke();
+
+                Assert.That(screen.VisibleTablePlayerCardCount, Is.EqualTo(3));
+                Assert.That(screen.TableHitButton.interactable, Is.True);
+                Assert.That(screen.TableStandButton.interactable, Is.True);
+                AssertGeneratedCardCount(root.transform, "Seats/Seat_0_Local/CardZone/Greybox_Card_View", 3);
             }
             finally
             {
@@ -240,6 +298,8 @@ namespace Casino.Tests.EditMode.Presentation
             seat.transform.SetParent(seats.transform, false);
             var playerCardZone = new GameObject("CardZone");
             playerCardZone.transform.SetParent(seat.transform, false);
+            var actionPromptAnchor = new GameObject("ActionPromptAnchor");
+            actionPromptAnchor.transform.SetParent(seat.transform, false);
             return root;
         }
 
